@@ -4,7 +4,7 @@ import InputBox from "./InputBox"
 import useActiveConversation from "./useActiveConversation";
 import Api from "./api";
 
-function reducer(state, action) {
+function conversationsReducer(state, action) {
   switch (action.type) {
     case "SET_ACTIVE_CONVERSATION": {
       return {
@@ -16,7 +16,30 @@ function reducer(state, action) {
     case "CLEAR_ACTIVE_CONVERSATION": {
       return {
         ...state,
-        activeConversationId: action.id
+        activeConversationId: state.conversations[state.conversations.length - 1].id
+      }
+    }
+
+    case "NEW_CONVERSATION": {
+      return {
+        conversations: [...state.conversations, action.conversation],
+        activeConversationId: action.conversation.id
+      }
+    }
+
+    case "NEW_MESSAGE": {
+      return {
+        ...state,
+        conversations: state.conversations.map(conversation => {
+          if (conversation.id === action.id) {
+            return {
+              ...conversation,
+              messages: [...conversation.messages, action.message ]
+            }
+          } else {
+            return conversation
+          }
+        })
       }
     }
 
@@ -26,15 +49,21 @@ function reducer(state, action) {
   }
 }
 
+function last(array) {
+  return array[array.length - 1];
+}
+
 export default function Feed({ initialConversations }) {
-  const [conversations, setConversations] = useState(initialConversations);
-  const { activeConversationId, setActiveConversationId } = useActiveConversation();
   const [secondsSinceLastMessage, setSecondsSinceLastMessage] = useState(500);
 
+  const [conversationState, dispatch] = useReducer(conversationsReducer, {
+    activeConversationId: last(initialConversations).id,
+    conversations: initialConversations
+  });
+
+  const { conversations, activeConversationId } = conversationState;
+
   const mostRecentConversation = conversations[conversations.length - 1];
-
-  const [state, dispatch] = useReducer({ activeConversationId: mostRecentConversation.id })
-
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -47,10 +76,18 @@ export default function Feed({ initialConversations }) {
   }, [])
   
   const handleSubmitMessage = async (messageText) => {
-    if (secondsSinceLastMessage > 60) {
+    if (secondsSinceLastMessage > 60 || conversations.length === 0) {
       const conversation = await Api.createConversation(messageText);
-      setConversations([...conversations, conversation]);
+      dispatch({ type: "NEW_CONVERSATION", conversation })
+    } else {
+      const message = await Api.createMessage(messageText);
+      dispatch({
+        type: "NEW_MESSAGE",
+        id: mostRecentConversation.id,
+        message
+      })
     }
+
     setSecondsSinceLastMessage(0);
   }
 
@@ -59,13 +96,15 @@ export default function Feed({ initialConversations }) {
       <div className="feed__conversations">
         {conversations.map(conversation =>
           <Conversation
+            isActive={activeConversationId === conversation.id && conversation.id !== mostRecentConversation.id}
+            dispatch={dispatch}
             key={conversation.id}
             id={conversation.id}
-            initialMessages={conversation.messages}
+            messages={conversation.messages}
           />
         )}
       </div>
-      {isLastConversationActive && (
+      {activeConversationId === mostRecentConversation.id && (
         <div className="feed__textbox">
           <InputBox onSubmit={handleSubmitMessage} />
         </div>

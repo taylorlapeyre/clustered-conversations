@@ -2,24 +2,18 @@ import React, { useState } from "react";
 import Message from "./Message";
 import InputBox from "./InputBox";
 import Api from "./api";
-import useActiveConversation from "./useActiveConversation"
 
-export default function Conversation({ id, initialMessages }) {
-  const [messages, setMessages] = useState(initialMessages);
-  const { activeConversationId, setActiveConversationId } = useActiveConversation();
-
-  const isActive = activeConversationId === id;
-
+export default function Conversation({ id, dispatch, isActive, messages }) {
   const handleSubmitNewMessage = async (text) => {
     const message = await Api.createMessage(text);
-    setMessages(messages => ([...messages, message]));
+    dispatch({ type: "NEW_MESSAGE", id, message })
   }
 
   const handleClick = () => {
     if (isActive) {
-      setActiveConversationId(null);
+      dispatch({ type: "CLEAR_ACTIVE_CONVERSATION" })
     } else {
-      setActiveConversationId(id);
+      dispatch({ type: "SET_ACTIVE_CONVERSATION", id })
     }
   }
 
@@ -28,7 +22,7 @@ export default function Conversation({ id, initialMessages }) {
       {messages.map(message =>
         <Message key={message.id} text={message.text} /> 
       )}
-      {activeConversationId === id && (
+      {isActive && (
         <div className="conversation__textbox" onClick={event => event.stopPropagation()}>
           <InputBox onSubmit={handleSubmitNewMessage} />
         </div>
