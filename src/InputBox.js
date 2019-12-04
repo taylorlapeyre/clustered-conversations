@@ -1,31 +1,31 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 
 export default function InputBox({ onSubmit }) {
   const [value, setValue] = useState("");
   const inputRef = useRef();
 
+  const handleSubmit = useCallback((event) => {
+    if (value.length > 0) {
+      onSubmit(value, event.metaKey);
+      setValue("");
+    }
+  }, [onSubmit, value]);
+
   useEffect(() => {
     const handleKeyDown = (event) => {
       if (event.key === "Enter") {
-        handleSubmit();
+        handleSubmit(event);
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
 
-    inputRef.current.focus();
-
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     }
-  });
+  }, [handleSubmit]);
 
-  const handleSubmit = () => {
-    if (value.length > 0) {
-      onSubmit(value);
-      setValue("");
-    }
-  };
+  useEffect(() => inputRef.current.focus(), []);
 
   return (
     <div className="input-box">

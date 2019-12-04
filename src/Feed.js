@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useReducer } from "react";
 import Conversation from "./Conversation"
 import InputBox from "./InputBox"
-import useActiveConversation from "./useActiveConversation";
 import Api from "./api";
 
 function conversationsReducer(state, action) {
@@ -54,7 +53,7 @@ function last(array) {
 }
 
 export default function Feed({ initialConversations }) {
-  const [secondsSinceLastMessage, setSecondsSinceLastMessage] = useState(500);
+  const [secondsSinceLastMessage, setSecondsSinceLastMessage] = useState(0);
 
   const [conversationState, dispatch] = useReducer(conversationsReducer, {
     activeConversationId: last(initialConversations).id,
@@ -75,8 +74,8 @@ export default function Feed({ initialConversations }) {
     }
   }, [])
   
-  const handleSubmitMessage = async (messageText) => {
-    if (secondsSinceLastMessage > 60 || conversations.length === 0) {
+  const handleSubmitMessage = async (messageText, forceNewConversation = false) => {
+    if (forceNewConversation || secondsSinceLastMessage > 60 || conversations.length === 0) {
       const conversation = await Api.createConversation(messageText);
       dispatch({ type: "NEW_CONVERSATION", conversation })
     } else {

@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import Message from "./Message";
 import InputBox from "./InputBox";
 import Api from "./api";
 
 export default function Conversation({ id, dispatch, isActive, messages }) {
-  const handleSubmitNewMessage = async (text) => {
+  const handleSubmitMessage = async (text) => {
     const message = await Api.createMessage(text);
     dispatch({ type: "NEW_MESSAGE", id, message })
   }
@@ -24,7 +24,7 @@ export default function Conversation({ id, dispatch, isActive, messages }) {
       )}
       {isActive && (
         <div className="conversation__textbox" onClick={event => event.stopPropagation()}>
-          <InputBox onSubmit={handleSubmitNewMessage} />
+          <InputBox onSubmit={handleSubmitMessage} />
         </div>
       )}
     </div>
