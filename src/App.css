@@ -1,22 +1,79 @@
-.App {
-  text-align: center;
+.feed {
+  width: 800px;
+  margin: 50px auto;
 }
 
-.App-logo {
-  height: 40vmin;
+.feed__conversations {
+  padding: 16px;
+  border-radius: 8px;
+  border: 4px solid #eee;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.feed__textbox {
+  margin-top: 8px;
+}
+
+
+
+.conversation {
+  transition: 200ms linear background-color;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  margin: 32px 0;
 }
 
-.App-link {
-  color: #09d3ac;
+.conversation:hover {
+  background-color: #ffe;
+}
+
+.conversation:first-of-type {
+  margin-top: 0px;
+}
+
+.conversation:last-of-type {
+  margin-bottom: 0px;
+}
+
+.conversation__textbox {
+  margin-top: 4px;
+}
+
+
+.message {
+  border-radius: 32px;
+  background-color: #eee;
+  padding: 16px;
+  margin: 4px 0;
+  width: max-content;
+  display: inline-flex;
+}
+
+.message:first-of-type {
+  margin-top: 0px;
+}
+
+.message:last-of-type {
+  margin-bottom: 0px;
+}
+
+
+
+.input-box {
+  display: grid;
+  grid-template-columns: 1fr 200px;
+  border-radius: 8px;
+  border: 4px solid #eee;
+}
+
+.input-box__input {
+  border: 0;
+  height: 32px;
+  font-size: 16px;
+  padding: 4px 8px;
+}
+
+.input-box__button {
+  background: #eee;
+  border: 0;
+  font-size: 16px;
 }
